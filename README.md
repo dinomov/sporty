@@ -100,7 +100,7 @@ This script will:
 
 curl -X POST http://localhost:8080/api/events \
      -H "Content-Type: application/json" \
-     -d '{"eventId”:”event1","eventName":"TeamA vs TeamB","eventWinnerId":"teamA"}'
+     -d '{"eventId":"event1","eventName":"TeamA vs TeamB","eventWinnerId":"teamA"}'
     
 ```
 
