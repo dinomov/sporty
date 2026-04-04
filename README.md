@@ -23,7 +23,7 @@ It provides:
 
 1. **Publish Event Outcome to Kafka**
 
-    * API endpoint: `/api/events/publish`
+    * API endpoint: `/api/events`
     * Event payload:
 
       ```json
