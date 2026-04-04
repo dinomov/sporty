@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:5432/betdb
+    username: user
+    password: pass
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    defer-datasource-initialization: true
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+
+  sql:
+    init:
+      mode: always
+
+  logging:
+    level:
+      root: INFO
+      com.sporty: DEBUG
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost}:9092
+    admin:
+      auto-create: true
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: bet-group
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      auto-offset-reset: earliest
+
+rocketmq:
+  name-server: ${ROCKETMQ_HOST:localhost}:9876
+  producer:
+    group: bet-producer
+    send-message-timeout: 10000
+    retry-times-when-send-failed: 2
+  consumer:
+    group: bet-settlements-group
