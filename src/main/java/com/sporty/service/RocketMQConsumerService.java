@@ -6,7 +6,11 @@ import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.retry.annotation.Backoff;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RocketMQMessageListener(topic = "bet-settlements", consumerGroup = "bet-settlements-group")
@@ -21,16 +25,22 @@ public class RocketMQConsumerService implements RocketMQListener<Bet> {
     }
 
     @Override
+    @Transactional
+    @Retryable(
+            value = {DataAccessException.class, RuntimeException.class},
+            maxAttempts = 3,
+            backoff = @Backoff(delay = 2000)
+    )
     public void onMessage(Bet bet) {
-        try {
-            log.info("Received bet settlement from RocketMQ: {}", bet.getBetId());
-            log.info("Settled {} for user {} on event {} with winner {}",
-                    bet.getBetId(), bet.getUserId(), bet.getEventId(), bet.getEventWinnerId());
+        log.info("Processing bet {}", bet.getBetId());
 
-            bet.setSettled(true);
-            repository.save(bet);
-        } catch (Exception e) {
-            log.error("Failed to process bet message", e);
+        int updated = repository.markAsSettled(bet.getBetId());
+
+        if (updated == 0) {
+            log.warn("Bet already settled: {}", bet.getBetId());
+            return;
         }
+
+        log.info("Successfully settled bet {}", bet.getBetId());
     }
 }

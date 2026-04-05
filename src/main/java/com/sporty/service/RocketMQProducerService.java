@@ -2,10 +2,13 @@ package com.sporty.service;
 
 import com.sporty.model.Bet;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class RocketMQProducerService {
+    private static final Logger log = LoggerFactory.getLogger(RocketMQProducerService.class);
 
     private RocketMQTemplate rocketMQTemplate;
 
@@ -17,7 +20,8 @@ public class RocketMQProducerService {
         try {
             rocketMQTemplate.convertAndSend("bet-settlements", bet);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error("Failed to send bet {} to RocketMQ", bet.getBetId(), e);
+            throw e; // triggers retry
         }
     }
 }
